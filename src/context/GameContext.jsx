@@ -18,7 +18,8 @@ const ACTIONS_TYPES = {
   DEAL_RIVER: 'DEAL_RIVER',
   SHOWDOWN: 'SHOWDOWN',
   END_HAND: 'END_HAND',
-  SET_MESSAGE: 'SET_MESSAGE'
+  SET_MESSAGE: 'SET_MESSAGE',
+  RESTART_GAME: 'RESTART_GAME'
 };
 
 // Helper function to add message to log
@@ -35,6 +36,11 @@ function gameReducer(state, action) {
     case ACTIONS_TYPES.START_GAME: {
       const newState = initializeGame();
       return startNewHand(newState);
+    }
+
+    case ACTIONS_TYPES.RESTART_GAME: {
+      const newState = initializeGame();
+      return addMessage(startNewHand(newState), 'Game restarted! All chips reset.');
     }
 
     case ACTIONS_TYPES.START_NEW_HAND: {

@@ -57,12 +57,13 @@ export default function Table() {
 
   const humanPlayer = players[0];
   const currentBets = players.reduce((sum, p) => sum + p.bet, 0);
+  const isGameOver = humanPlayer.chips === 0 && humanPlayer.status === PLAYER_STATUS.OUT;
 
   const isHumanTurn = currentPlayer === 0 && phase !== GAME_PHASES.SHOWDOWN;
 
-  // Auto-start new hand after showdown
+  // Auto-start new hand after showdown (unless game is over)
   useEffect(() => {
-    if (phase === GAME_PHASES.SHOWDOWN && winners) {
+    if (phase === GAME_PHASES.SHOWDOWN && winners && !isGameOver) {
       const timer = setTimeout(() => {
         dispatch({ type: ACTIONS_TYPES.END_HAND });
         setTimeout(() => {
@@ -71,7 +72,7 @@ export default function Table() {
       }, 3000); // 3 seconds delay to show results
       return () => clearTimeout(timer);
     }
-  }, [phase, winners, dispatch]);
+  }, [phase, winners, isGameOver, dispatch]);
 
   return (
     <div className="flex gap-8 w-full max-w-[1600px] mx-auto">
@@ -153,6 +154,22 @@ export default function Table() {
             >
               Start Game
             </button>
+          </div>
+        )}
+
+        {/* Game Over - Restart button */}
+        {isGameOver && state.handNumber > 0 && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-75 rounded-[192px]">
+            <div className="text-center">
+              <div className="text-white text-3xl font-bold mb-6">Game Over!</div>
+              <div className="text-gray-300 text-xl mb-8">You ran out of chips</div>
+              <button
+                onClick={() => dispatch({ type: ACTIONS_TYPES.RESTART_GAME })}
+                className="bg-green-600 hover:bg-green-700 text-white font-bold text-2xl py-4 px-8 rounded-lg shadow-xl transition-colors"
+              >
+                Restart Game
+              </button>
+            </div>
           </div>
         )}
         </div>
