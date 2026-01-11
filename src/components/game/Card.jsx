@@ -20,15 +20,15 @@ export default function Card({ card, faceDown = false, className = '' }) {
   const rank = RANK_NAMES[card.rank];
 
   return (
-    <div className={`bg-white rounded-lg shadow-lg border-2 border-gray-300 w-16 h-24 flex flex-col items-center justify-between p-2 ${className}`}>
-      <div className={`text-2xl font-bold ${color === 'red' ? 'text-red-600' : 'text-gray-900'}`}>
-        {rank}
-      </div>
-      <div className={`text-4xl ${color === 'red' ? 'text-red-600' : 'text-gray-900'}`}>
-        {symbol}
-      </div>
-      <div className={`text-2xl font-bold ${color === 'red' ? 'text-red-600' : 'text-gray-900'}`}>
-        {rank}
+    <div className={`bg-white rounded-lg shadow-lg border-2 border-gray-300 w-16 h-24 p-1.5 ${className}`}>
+      {/* Top left corner - rank and suit */}
+      <div className={`flex flex-col items-center leading-none ${color === 'red' ? 'text-red-600' : 'text-gray-900'}`}>
+        <div className="text-xl font-bold">
+          {rank}
+        </div>
+        <div className="text-2xl -mt-0.5">
+          {symbol}
+        </div>
       </div>
     </div>
   );
