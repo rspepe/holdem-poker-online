@@ -21,6 +21,15 @@ const ACTIONS_TYPES = {
   SET_MESSAGE: 'SET_MESSAGE'
 };
 
+// Helper function to add message to log
+function addMessage(state, message) {
+  return {
+    ...state,
+    message,
+    messages: [...(state.messages || []), { handNumber: state.handNumber, text: message }]
+  };
+}
+
 function gameReducer(state, action) {
   switch (action.type) {
     case ACTIONS_TYPES.START_GAME: {
@@ -59,15 +68,13 @@ function gameReducer(state, action) {
           }
         });
 
-        return {
+        return addMessage({
           ...newState,
           players,
           pot: 0,
           phase: GAME_PHASES.SHOWDOWN,
-          message: `${winner.name} wins ${winAmount} chips!`,
-          winners: [winner.id],
-          showWinnerModal: true
-        };
+          winners: [winner.id]
+        }, `${winner.name} wins ${winAmount} chips!`);
       }
 
       return newState;
@@ -99,38 +106,35 @@ function gameReducer(state, action) {
 
     case ACTIONS_TYPES.DEAL_FLOP: {
       const { cards, remainingDeck } = dealCards(state.deck, 3);
-      return {
+      return addMessage({
         ...state,
         communityCards: cards,
         deck: remainingDeck,
         phase: GAME_PHASES.FLOP,
-        currentPlayer: getNextActivePlayer(state, state.dealerButton),
-        message: 'Flop dealt'
-      };
+        currentPlayer: getNextActivePlayer(state, state.dealerButton)
+      }, 'Flop dealt');
     }
 
     case ACTIONS_TYPES.DEAL_TURN: {
       const { cards, remainingDeck } = dealCards(state.deck, 1);
-      return {
+      return addMessage({
         ...state,
         communityCards: [...state.communityCards, ...cards],
         deck: remainingDeck,
         phase: GAME_PHASES.TURN,
-        currentPlayer: getNextActivePlayer(state, state.dealerButton),
-        message: 'Turn dealt'
-      };
+        currentPlayer: getNextActivePlayer(state, state.dealerButton)
+      }, 'Turn dealt');
     }
 
     case ACTIONS_TYPES.DEAL_RIVER: {
       const { cards, remainingDeck } = dealCards(state.deck, 1);
-      return {
+      return addMessage({
         ...state,
         communityCards: [...state.communityCards, ...cards],
         deck: remainingDeck,
         phase: GAME_PHASES.RIVER,
-        currentPlayer: getNextActivePlayer(state, state.dealerButton),
-        message: 'River dealt'
-      };
+        currentPlayer: getNextActivePlayer(state, state.dealerButton)
+      }, 'River dealt');
     }
 
     case ACTIONS_TYPES.SHOWDOWN: {
@@ -165,21 +169,18 @@ function gameReducer(state, action) {
       const winnerNames = winnerIds.map(id => players[id].name).join(', ');
       const winnerHand = players.find(p => winnerIds.includes(p.id)).hand;
 
-      return {
+      return addMessage({
         ...state,
         players,
         pot: 0,
         phase: GAME_PHASES.SHOWDOWN,
-        winners: winnerIds,
-        message: `${winnerNames} wins with ${winnerHand.description}!`,
-        showWinnerModal: true
-      };
+        winners: winnerIds
+      }, `${winnerNames} wins with ${winnerHand.description}!`);
     }
 
     case ACTIONS_TYPES.END_HAND: {
       return {
         ...state,
-        showWinnerModal: false,
         winners: null
       };
     }

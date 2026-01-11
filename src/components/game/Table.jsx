@@ -1,10 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useGame, ACTIONS_TYPES } from '../../context/GameContext';
 import Player from './Player';
 import CommunityCards from './CommunityCards';
 import Pot from './Pot';
 import ActionButtons from './ActionButtons';
-import Modal from '../ui/Modal';
+import MessageLog from './MessageLog';
 import { GAME_PHASES, PLAYER_STATUS } from '../../utils/constants';
 import { decideCPUAction } from '../../ai/cpuStrategy';
 
@@ -53,22 +53,28 @@ export default function Table() {
     return <div className="text-white">Loading...</div>;
   }
 
-  const { players, communityCards, pot, currentPlayer, phase, message, showWinnerModal, winners } = state;
+  const { players, communityCards, pot, currentPlayer, phase, message, winners, messages } = state;
 
   const humanPlayer = players[0];
   const currentBets = players.reduce((sum, p) => sum + p.bet, 0);
 
-  const handleNewHand = () => {
-    dispatch({ type: ACTIONS_TYPES.END_HAND });
-    setTimeout(() => {
-      dispatch({ type: ACTIONS_TYPES.START_NEW_HAND });
-    }, 300);
-  };
-
   const isHumanTurn = currentPlayer === 0 && phase !== GAME_PHASES.SHOWDOWN;
 
+  // Auto-start new hand after showdown
+  useEffect(() => {
+    if (phase === GAME_PHASES.SHOWDOWN && winners) {
+      const timer = setTimeout(() => {
+        dispatch({ type: ACTIONS_TYPES.END_HAND });
+        setTimeout(() => {
+          dispatch({ type: ACTIONS_TYPES.START_NEW_HAND });
+        }, 500);
+      }, 3000); // 3 seconds delay to show results
+      return () => clearTimeout(timer);
+    }
+  }, [phase, winners, dispatch]);
+
   return (
-    <div className="relative">
+    <div className="relative flex gap-6">
       {/* Poker Table */}
       <div className="bg-gradient-to-br from-poker-green to-poker-green-dark rounded-[200px] border-8 border-amber-900 shadow-2xl p-8 w-[900px] h-[600px] relative">
         {/* Table felt pattern */}
@@ -135,53 +141,28 @@ export default function Table() {
         <div className="absolute top-4 right-4 bg-blue-900 bg-opacity-70 text-white px-4 py-2 rounded-lg text-xs font-semibold">
           Hand #{state.handNumber}
         </div>
+
+        {/* Start button for first game */}
+        {state.handNumber === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-[192px]">
+            <button
+              onClick={() => dispatch({ type: ACTIONS_TYPES.START_GAME })}
+              className="bg-green-600 hover:bg-green-700 text-white font-bold text-2xl py-4 px-8 rounded-lg shadow-xl transition-colors"
+            >
+              Start Game
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Action buttons */}
-      {isHumanTurn && (
-        <div className="mt-6">
-          <ActionButtons player={humanPlayer} />
-        </div>
-      )}
+      {/* Right side panel */}
+      <div className="flex flex-col gap-4">
+        {/* Message Log */}
+        <MessageLog messages={messages || []} />
 
-      {/* Winner Modal */}
-      <Modal
-        isOpen={showWinnerModal}
-        onClose={handleNewHand}
-        title="🎉 Winner! 🎉"
-      >
-        <div className="text-center">
-          <p className="text-xl mb-4">{message}</p>
-          {winners && winners.length > 0 && (
-            <div className="space-y-2">
-              {winners.map(winnerId => {
-                const winner = players[winnerId];
-                return (
-                  <div key={winnerId} className="bg-gray-700 p-3 rounded-lg">
-                    <div className="font-bold text-lg text-yellow-400">{winner.name}</div>
-                    <div className="text-sm text-gray-300">{winner.chips} chips</div>
-                    {winner.hand && (
-                      <div className="text-sm text-green-400 mt-1">{winner.hand.description}</div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </Modal>
-
-      {/* Start button for first game */}
-      {state.handNumber === 0 && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <button
-            onClick={() => dispatch({ type: ACTIONS_TYPES.START_GAME })}
-            className="bg-green-600 hover:bg-green-700 text-white font-bold text-2xl py-4 px-8 rounded-lg shadow-xl transition-colors"
-          >
-            Start Game
-          </button>
-        </div>
-      )}
+        {/* Action buttons - always visible */}
+        <ActionButtons player={humanPlayer} isActive={isHumanTurn} />
+      </div>
     </div>
   );
 }

@@ -80,7 +80,8 @@ export function initializeGame() {
     smallBlind: SMALL_BLIND,
     bigBlind: BIG_BLIND,
     handNumber: 0,
-    message: 'Welcome to Texas Hold\'em Poker!'
+    message: 'Welcome to Texas Hold\'em Poker!',
+    messages: [{ handNumber: 0, text: 'Welcome to Texas Hold\'em Poker!' }]
   };
 }
 
