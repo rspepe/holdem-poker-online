@@ -74,9 +74,11 @@ export default function Table() {
   }, [phase, winners, dispatch]);
 
   return (
-    <div className="relative flex gap-6">
-      {/* Poker Table */}
-      <div className="bg-gradient-to-br from-poker-green to-poker-green-dark rounded-[200px] border-8 border-amber-900 shadow-2xl p-8 w-[900px] h-[600px] relative">
+    <div className="flex gap-6">
+      {/* Left side - Table and Action Buttons */}
+      <div className="flex flex-col gap-4">
+        {/* Poker Table */}
+        <div className="bg-gradient-to-br from-poker-green to-poker-green-dark rounded-[200px] border-8 border-amber-900 shadow-2xl p-8 w-[900px] h-[600px] relative">
         {/* Table felt pattern */}
         <div className="absolute inset-0 rounded-[192px] opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent" />
 
@@ -153,16 +155,14 @@ export default function Table() {
             </button>
           </div>
         )}
-      </div>
+        </div>
 
-      {/* Right side panel */}
-      <div className="flex flex-col gap-4">
-        {/* Message Log */}
-        <MessageLog messages={messages || []} />
-
-        {/* Action buttons - always visible */}
+        {/* Action buttons - below table, always visible */}
         <ActionButtons player={humanPlayer} isActive={isHumanTurn} />
       </div>
+
+      {/* Right side panel - Message Log only */}
+      <MessageLog messages={messages || []} />
     </div>
   );
 }

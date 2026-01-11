@@ -31,7 +31,7 @@ export default function ActionButtons({ player, isActive }) {
   const disabledClass = "text-gray-500 cursor-not-allowed opacity-50";
 
   return (
-    <div className="bg-gray-800 rounded-lg p-4 shadow-xl border-2 border-gray-700 min-h-[120px]">
+    <div className="bg-gray-800 rounded-lg p-4 shadow-xl border-2 border-gray-700 min-h-[120px] w-[900px]">
       <div className={`text-center mb-3 font-bold ${isActive ? 'text-white' : 'text-gray-500'}`}>
         {isActive ? 'Your Turn' : 'Waiting...'}
       </div>
