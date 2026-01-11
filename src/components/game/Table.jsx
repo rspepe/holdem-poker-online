@@ -60,19 +60,14 @@ export default function Table() {
   const isGameOver = humanPlayer.chips === 0 && humanPlayer.status === PLAYER_STATUS.OUT;
 
   const isHumanTurn = currentPlayer === 0 && phase !== GAME_PHASES.SHOWDOWN;
+  const isShowdown = phase === GAME_PHASES.SHOWDOWN && winners;
 
-  // Auto-start new hand after showdown (unless game is over)
-  useEffect(() => {
-    if (phase === GAME_PHASES.SHOWDOWN && winners && !isGameOver) {
-      const timer = setTimeout(() => {
-        dispatch({ type: ACTIONS_TYPES.END_HAND });
-        setTimeout(() => {
-          dispatch({ type: ACTIONS_TYPES.START_NEW_HAND });
-        }, 500);
-      }, 3000); // 3 seconds delay to show results
-      return () => clearTimeout(timer);
-    }
-  }, [phase, winners, isGameOver, dispatch]);
+  const handleNextHand = () => {
+    dispatch({ type: ACTIONS_TYPES.END_HAND });
+    setTimeout(() => {
+      dispatch({ type: ACTIONS_TYPES.START_NEW_HAND });
+    }, 100);
+  };
 
   return (
     <div className="flex gap-8 w-full max-w-[1600px] mx-auto">
@@ -176,6 +171,18 @@ export default function Table() {
 
         {/* Action buttons - below table, always visible */}
         <ActionButtons player={humanPlayer} isActive={isHumanTurn} />
+
+        {/* Next Hand button - shown after showdown */}
+        {isShowdown && !isGameOver && (
+          <div className="flex justify-center">
+            <button
+              onClick={handleNextHand}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xl py-3 px-8 rounded-lg shadow-xl transition-colors"
+            >
+              Next Hand →
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Right Pane - Log Area */}
