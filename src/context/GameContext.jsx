@@ -152,6 +152,14 @@ function gameReducer(state, action) {
 
         const allCards = [...player.holeCards, ...state.communityCards];
         const hand = evaluateHand(allCards);
+
+        // Debug log
+        console.log(`Player ${player.name}:`, {
+          holeCards: player.holeCards,
+          communityCards: state.communityCards,
+          hand: hand
+        });
+
         return { ...player, hand, folded: false };
       });
 
@@ -160,7 +168,7 @@ function gameReducer(state, action) {
       const totalPot = state.pot + state.players.reduce((sum, p) => sum + p.bet, 0);
       const winAmount = Math.floor(totalPot / winnerIds.length);
 
-      // Distribute winnings
+      // Distribute winnings and keep hand information
       const players = playersWithHands.map(player => {
         const isWinner = winnerIds.includes(player.id);
         const newChips = isWinner ? player.chips + winAmount : player.chips;
@@ -168,12 +176,23 @@ function gameReducer(state, action) {
           ...player,
           chips: newChips,
           bet: 0,
-          status: newChips === 0 ? PLAYER_STATUS.OUT : player.status
+          status: newChips === 0 ? PLAYER_STATUS.OUT : player.status,
+          hand: player.hand // Explicitly keep hand
         };
       });
 
-      const winnerNames = winnerIds.map(id => players[id].name).join(', ');
-      const winnerHand = players.find(p => winnerIds.includes(p.id)).hand;
+      const winnerPlayers = winnerIds.map(id => players.find(p => p.id === id));
+      const winnerNames = winnerPlayers.map(p => p.name).join(', ');
+      const winnerHand = winnerPlayers[0].hand;
+
+      // Debug log
+      console.log('Winners:', winnerIds);
+      console.log('Winner players:', winnerPlayers);
+      console.log('Winner hand:', winnerHand);
+
+      if (!winnerHand) {
+        console.error('Winner hand is undefined!', winnerPlayers[0]);
+      }
 
       return addMessage({
         ...state,
@@ -181,7 +200,7 @@ function gameReducer(state, action) {
         pot: 0,
         phase: GAME_PHASES.SHOWDOWN,
         winners: winnerIds
-      }, `${winnerNames} wins with ${winnerHand.description}!`);
+      }, `${winnerNames} wins with ${winnerHand?.description || 'Unknown hand'}!`);
     }
 
     case ACTIONS_TYPES.END_HAND: {
