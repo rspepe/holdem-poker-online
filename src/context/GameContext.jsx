@@ -46,11 +46,18 @@ function gameReducer(state, action) {
         const winner = activePlayers[0];
         const winAmount = newState.pot + newState.players.reduce((sum, p) => sum + p.bet, 0);
 
-        const players = newState.players.map(p =>
-          p.id === winner.id
-            ? { ...p, chips: p.chips + winAmount, bet: 0 }
-            : { ...p, bet: 0 }
-        );
+        const players = newState.players.map(p => {
+          if (p.id === winner.id) {
+            return { ...p, chips: p.chips + winAmount, bet: 0 };
+          } else {
+            const newChips = p.chips;
+            return {
+              ...p,
+              bet: 0,
+              status: newChips === 0 ? PLAYER_STATUS.OUT : p.status
+            };
+          }
+        });
 
         return {
           ...newState,
@@ -146,10 +153,12 @@ function gameReducer(state, action) {
       // Distribute winnings
       const players = playersWithHands.map(player => {
         const isWinner = winnerIds.includes(player.id);
+        const newChips = isWinner ? player.chips + winAmount : player.chips;
         return {
           ...player,
-          chips: isWinner ? player.chips + winAmount : player.chips,
-          bet: 0
+          chips: newChips,
+          bet: 0,
+          status: newChips === 0 ? PLAYER_STATUS.OUT : player.status
         };
       });
 
