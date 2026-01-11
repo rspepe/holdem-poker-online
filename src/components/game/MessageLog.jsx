@@ -1,6 +1,6 @@
 export default function MessageLog({ messages }) {
   return (
-    <div className="bg-gray-900 bg-opacity-90 rounded-lg p-4 h-[600px] w-64 overflow-y-auto border-2 border-gray-700">
+    <div className="bg-gray-900 bg-opacity-90 rounded-lg p-4 h-[724px] w-full overflow-y-auto border-2 border-gray-700">
       <h3 className="text-white font-bold text-lg mb-3 sticky top-0 bg-gray-900 pb-2">Game Log</h3>
       <div className="space-y-2">
         {messages.map((msg, index) => (
