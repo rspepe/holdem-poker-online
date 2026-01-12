@@ -70,15 +70,38 @@ function evaluateFiveCards(cards) {
     throw new Error('Hand must contain exactly 5 cards');
   }
 
+  // Debug logging
+  console.log('=== evaluateFiveCards DEBUG ===');
+  console.log('Cards:', cards);
+  console.log('Cards structure:', cards.map(c => ({ rank: c.rank, suit: c.suit, value: c.value })));
+
   const rankCounts = getRankCounts(cards);
+  console.log('rankCounts:', rankCounts);
+
   const counts = Object.values(rankCounts).sort((a, b) => b - a);
+  console.log('counts:', counts);
+
   const ranks = Object.keys(rankCounts).sort((a, b) => RANK_VALUES[b] - RANK_VALUES[a]);
+  console.log('ranks:', ranks);
+  console.log('RANK_VALUES check:', ranks.map(r => ({ rank: r, value: RANK_VALUES[r] })));
 
   const flush = isFlush(cards);
   const straight = isStraight(cards);
+  console.log('flush:', flush, 'straight:', straight);
+  console.log('Checking hand types...');
+  console.log('- Royal Flush check: flush && straight === 14 =>', flush && straight === 14);
+  console.log('- Straight Flush check: flush && straight =>', flush && straight);
+  console.log('- Four of a Kind check: counts[0] === 4 =>', counts[0] === 4);
+  console.log('- Full House check: counts[0] === 3 && counts[1] === 2 =>', counts[0] === 3 && counts[1] === 2);
+  console.log('- Flush check:', flush);
+  console.log('- Straight check:', straight);
+  console.log('- Three of a Kind check: counts[0] === 3 =>', counts[0] === 3);
+  console.log('- Two Pair check: counts[0] === 2 && counts[1] === 2 =>', counts[0] === 2 && counts[1] === 2);
+  console.log('- One Pair check: counts[0] === 2 =>', counts[0] === 2);
 
   // Royal Flush
   if (flush && straight === 14) {
+    console.log('>>> DETECTED: Royal Flush');
     return {
       ranking: HAND_RANKINGS.ROYAL_FLUSH,
       score: 10000000,
@@ -90,6 +113,7 @@ function evaluateFiveCards(cards) {
 
   // Straight Flush
   if (flush && straight) {
+    console.log('>>> DETECTED: Straight Flush');
     return {
       ranking: HAND_RANKINGS.STRAIGHT_FLUSH,
       score: 9000000 + straight,
@@ -101,6 +125,7 @@ function evaluateFiveCards(cards) {
 
   // Four of a Kind
   if (counts[0] === 4) {
+    console.log('>>> DETECTED: Four of a Kind');
     const quadRank = ranks.find(r => rankCounts[r] === 4);
     const kicker = ranks.find(r => rankCounts[r] === 1);
     return {
@@ -114,6 +139,7 @@ function evaluateFiveCards(cards) {
 
   // Full House
   if (counts[0] === 3 && counts[1] === 2) {
+    console.log('>>> DETECTED: Full House');
     const tripRank = ranks.find(r => rankCounts[r] === 3);
     const pairRank = ranks.find(r => rankCounts[r] === 2);
     return {
@@ -127,6 +153,7 @@ function evaluateFiveCards(cards) {
 
   // Flush
   if (flush) {
+    console.log('>>> DETECTED: Flush');
     const score = 6000000 + ranks.reduce((sum, rank, i) => sum + RANK_VALUES[rank] * Math.pow(100, 4 - i), 0);
     return {
       ranking: HAND_RANKINGS.FLUSH,
@@ -139,6 +166,7 @@ function evaluateFiveCards(cards) {
 
   // Straight
   if (straight) {
+    console.log('>>> DETECTED: Straight');
     return {
       ranking: HAND_RANKINGS.STRAIGHT,
       score: 5000000 + straight,
@@ -150,6 +178,7 @@ function evaluateFiveCards(cards) {
 
   // Three of a Kind
   if (counts[0] === 3) {
+    console.log('>>> DETECTED: Three of a Kind');
     const tripRank = ranks.find(r => rankCounts[r] === 3);
     const kickers = ranks.filter(r => rankCounts[r] === 1).slice(0, 2);
     const score = 4000000 + RANK_VALUES[tripRank] * 10000 +
@@ -165,6 +194,7 @@ function evaluateFiveCards(cards) {
 
   // Two Pair
   if (counts[0] === 2 && counts[1] === 2) {
+    console.log('>>> DETECTED: Two Pair');
     const pairs = ranks.filter(r => rankCounts[r] === 2).sort((a, b) => RANK_VALUES[b] - RANK_VALUES[a]);
     const kicker = ranks.find(r => rankCounts[r] === 1);
     const score = 3000000 + RANK_VALUES[pairs[0]] * 10000 +
@@ -180,6 +210,7 @@ function evaluateFiveCards(cards) {
 
   // One Pair
   if (counts[0] === 2) {
+    console.log('>>> DETECTED: One Pair');
     const pairRank = ranks.find(r => rankCounts[r] === 2);
     const kickers = ranks.filter(r => rankCounts[r] === 1).slice(0, 3);
     const score = 2000000 + RANK_VALUES[pairRank] * 1000000 +
@@ -197,13 +228,15 @@ function evaluateFiveCards(cards) {
 
   // High Card
   const score = 1000000 + ranks.reduce((sum, rank, i) => sum + RANK_VALUES[rank] * Math.pow(100, 4 - i), 0);
-  return {
+  const result = {
     ranking: HAND_RANKINGS.HIGH_CARD,
     score,
     name: HAND_NAMES[HAND_RANKINGS.HIGH_CARD],
     description: `High Card, ${RANK_NAMES[ranks[0]]}`,
     cards: cards
   };
+  console.log('Returning High Card:', result);
+  return result;
 }
 
 /**
@@ -240,25 +273,32 @@ function getCombinations(cards) {
  * @returns {Object} Best hand evaluation
  */
 export function evaluateHand(cards) {
+  console.log('*** evaluateHand called with', cards.length, 'cards');
+
   if (cards.length < 5) {
     throw new Error('Need at least 5 cards to evaluate a hand');
   }
 
   if (cards.length === 5) {
+    console.log('Evaluating 5 cards directly');
     return evaluateFiveCards(cards);
   }
 
   if (cards.length === 7) {
+    console.log('Evaluating all combinations of 7 cards (21 combinations)');
     const combinations = getCombinations(cards);
     let bestHand = null;
 
-    combinations.forEach(combo => {
+    combinations.forEach((combo, index) => {
+      console.log(`\n--- Combination ${index + 1}/21 ---`);
       const evaluation = evaluateFiveCards(combo);
       if (!bestHand || evaluation.score > bestHand.score) {
+        console.log(`New best hand found! Score: ${evaluation.score}, ${evaluation.description}`);
         bestHand = evaluation;
       }
     });
 
+    console.log('\n*** FINAL BEST HAND:', bestHand);
     return bestHand;
   }
 
