@@ -169,20 +169,22 @@ export default function Table() {
         )}
         </div>
 
-        {/* Action buttons - below table, always visible */}
-        <ActionButtons player={humanPlayer} isActive={isHumanTurn} />
+        {/* Action buttons container with overlay */}
+        <div className="relative">
+          <ActionButtons player={humanPlayer} isActive={isHumanTurn} />
 
-        {/* Next Hand button - shown after showdown */}
-        {isShowdown && !isGameOver && (
-          <div className="flex justify-center">
-            <button
-              onClick={handleNextHand}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xl py-3 px-8 rounded-lg shadow-xl transition-colors"
-            >
-              Next Hand →
-            </button>
-          </div>
-        )}
+          {/* Next Hand button overlay - shown after showdown */}
+          {isShowdown && !isGameOver && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
+              <button
+                onClick={handleNextHand}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-2xl py-4 px-10 rounded-lg shadow-2xl transition-colors border-2 border-blue-400"
+              >
+                Next Hand →
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Right Pane - Log Area */}
